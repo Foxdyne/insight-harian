@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Insight Harian</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Insight">
+<meta name="theme-color" content="#0D1318" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#EEF1F4" media="(prefers-color-scheme: light)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%8C%85%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF1F4; --surface:#FFFFFF; --ink:#17212B; --muted:#5A6773; --faint:#8A96A1;
+  --line:#D3DAE0; --grid:#EEF1F3; --candle:#7F8C98;
+  --floor:#2E7A58; --stop:#B3423A; --target:#976C1C; --roof:#8A96A1;
+  --accent:#2D5C9B; --accent-soft:rgba(45,92,155,.08);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D1318; --surface:#141C23; --ink:#E3E9EE; --muted:#93A0AB; --faint:#66737E;
+    --line:#24303A; --grid:#19222A; --candle:#6E7D89;
+    --floor:#4DAF83; --stop:#DE6A5F; --target:#D4A447; --roof:#7C8995;
+    --accent:#79A6E4; --accent-soft:rgba(121,166,228,.10);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D1318; --surface:#141C23; --ink:#E3E9EE; --muted:#93A0AB; --faint:#66737E;
+  --line:#24303A; --grid:#19222A; --candle:#6E7D89;
+  --floor:#4DAF83; --stop:#DE6A5F; --target:#D4A447; --roof:#7C8995;
+  --accent:#79A6E4; --accent-soft:rgba(121,166,228,.10);
+  color-scheme: dark;
+}
+:root{box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0; background:var(--bg); color:var(--ink); font:400 15px/1.5 "IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; font-variant-numeric:tabular-nums; -webkit-font-smoothing:antialiased;}
+.wrap{max-width:720px; margin:0 auto; padding:20px 16px 40px}
+.cond{font-family:"IBM Plex Sans Condensed","IBM Plex Sans",system-ui,sans-serif}
+
+.top{display:flex; justify-content:space-between; align-items:baseline; gap:12px; flex-wrap:wrap}
+.brand{margin:0; font:600 15px/1.2 "IBM Plex Sans Condensed",system-ui,sans-serif; color:var(--muted)}
+.fresh{margin:0; font-size:13px; color:var(--muted)}
+.fresh.warn{color:var(--stop)}
+.alert{margin:16px 0 0; padding:12px 14px; border-radius:10px; border:1px solid var(--stop); background:var(--surface); font-size:14px}
+.alert[hidden]{display:none}
+
+.hero{margin:28px 0 26px}
+.hero h2{margin:0 0 10px; font:600 clamp(32px,8.5vw,50px)/1.04 "IBM Plex Sans Condensed",system-ui,sans-serif; letter-spacing:-.01em; max-width:16ch}
+.hero p{margin:0; color:var(--muted); max-width:52ch}
+
+.panel{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:30px}
+.coin-head{display:flex; justify-content:space-between; align-items:baseline; gap:12px}
+.sym{margin:0; font:600 30px/1.05 "IBM Plex Sans Condensed",system-ui,sans-serif; overflow-wrap:anywhere}
+.sym small{font-size:15px; color:var(--faint); font-weight:500; margin-left:2px}
+.skor{font-size:13px; color:var(--muted); text-align:right; white-space:nowrap}
+.skor b{display:block; font:600 26px/1 "IBM Plex Sans Condensed",system-ui,sans-serif; color:var(--ink)}
+.ctx{margin:8px 0 0; font-size:13px; color:var(--muted); display:flex; flex-wrap:wrap; gap:2px 16px}
+.ctx b{color:var(--ink); font-weight:600}
+.ctx .mid{color:var(--stop)}
+
+.chart-box{position:relative; margin:14px -6px 6px; height:300px}
+.chart{position:absolute; inset:0}
+.chart-msg{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; text-align:center; padding:16px; color:var(--muted); font-size:14px; background:var(--surface)}
+.chart-msg[hidden]{display:none}
+.legend{display:flex; flex-wrap:wrap; gap:14px; margin:4px 0 0; padding:0; list-style:none; font-size:12px; color:var(--muted)}
+.legend li{display:flex; align-items:center; gap:6px}
+.legend i{display:inline-block; width:16px; height:0; border-top:2px solid}
+
+.menu-title{margin:20px 0 8px; font:600 17px/1.2 "IBM Plex Sans Condensed",system-ui,sans-serif}
+.opts{display:grid; gap:10px}
+.opt{appearance:none; width:100%; text-align:left; cursor:pointer; color:inherit; font:inherit; background:var(--bg); border:1.5px solid transparent; border-radius:12px; padding:12px 14px}
+.opt[aria-pressed="true"]{border-color:var(--floor); background:var(--surface)}
+.opt-head{display:flex; justify-content:space-between; align-items:baseline; gap:10px}
+.opt-name{font:600 15px/1.2 "IBM Plex Sans Condensed",system-ui,sans-serif; color:var(--floor)}
+.opt-price{font-weight:600; font-size:17px}
+.opt-sub{margin:2px 0 8px; font-size:12px; color:var(--muted)}
+.opt-sub .no{color:var(--stop)}
+.opt-rows{display:grid; grid-template-columns:1fr auto; gap:4px 12px; font-size:14px}
+.opt-rows .k{color:var(--muted)}
+.opt-rows .v{text-align:right; font-weight:500}
+.good{color:var(--floor); font-weight:600}
+.empty{margin:16px 0 0; color:var(--muted); font-size:14px}
+
+section h3{margin:0 0 4px; font:600 19px/1.2 "IBM Plex Sans Condensed",system-ui,sans-serif}
+section .note{margin:0 0 10px; font-size:13px; color:var(--muted)}
+.list{list-style:none; margin:0 0 30px; padding:0; border-top:1px solid var(--line)}
+.row{appearance:none; width:100%; cursor:pointer; text-align:left; color:inherit; font:inherit; background:transparent; border:0; border-bottom:1px solid var(--line); display:grid; grid-template-columns:minmax(0,1fr) 84px 64px; gap:10px; align-items:center; padding:11px 6px}
+.row[aria-pressed="true"]{background:var(--accent-soft)}
+.row .n{font:600 17px/1.2 "IBM Plex Sans Condensed",system-ui,sans-serif; overflow-wrap:anywhere}
+.row .where{display:block; font:400 12px/1.4 "IBM Plex Sans",system-ui,sans-serif; color:var(--muted)}
+.row .where.mid{color:var(--stop)}
+.row .sc{font-weight:600; font-size:14px}
+.bar{display:block; height:6px; border-radius:3px; background:var(--grid); margin-top:6px; overflow:hidden}
+.bar span{display:block; height:100%; background:var(--accent)}
+.row .hd{text-align:right; font-size:14px}
+.row .hd small{display:block; font-size:11px; color:var(--muted)}
+.foot{margin:10px 0 0; font-size:12px; color:var(--faint); max-width:60ch}
+button:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+@media (prefers-reduced-motion: reduce){*{scroll-behavior:auto !important}}
+@media (max-width:420px){.row{grid-template-columns:minmax(0,1fr) 66px 56px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="top">
+    <h1 class="brand">Insight harian</h1>
+    <p class="fresh" id="fresh">Memuat</p>
+  </header>
+  <p class="alert" id="alert" role="status" hidden></p>
+
+  <section class="hero" id="hero" aria-live="polite">
+    <h2>Memuat menu pagi ini</h2>
+    <p>Mengambil hasil hitungan pagi dari mesin.</p>
+  </section>
+
+  <section class="panel" id="coin" aria-label="Koin terpilih">
+    <div class="coin-head">
+      <h3 class="sym" id="c-sym">&nbsp;</h3>
+      <div class="skor" id="c-skor"></div>
+    </div>
+    <p class="ctx" id="c-ctx"></p>
+    <div class="chart-box">
+      <div class="chart" id="chart"></div>
+      <div class="chart-msg" id="chart-msg">Memuat chart</div>
+    </div>
+    <ul class="legend" aria-hidden="true">
+      <li><i style="border-color:var(--floor)"></i>lantai</li>
+      <li><i style="border-color:var(--stop); border-top-style:dashed"></i>batal</li>
+      <li><i style="border-color:var(--roof); border-top-style:dotted"></i>atap dekat</li>
+      <li><i style="border-color:var(--target); border-top-style:dashed"></i>atap besar</li>
+    </ul>
+    <div id="menu"></div>
+  </section>
+
+  <section aria-labelledby="h-list">
+    <h3 id="h-list">Koin pagi ini</h3>
+    <p class="note">Lolos saringan volume, umur, dan anti-FOMO, serta cukup hidup. Diurutkan dari skor keterbacaan tertinggi. Ketuk untuk melihat menunya.</p>
+    <ol class="list" id="list"></ol>
+  </section>
+
+  <p class="foot">Ini menu, bukan sinyal: keputusan masuk tetap di matamu. Dihitung setiap pagi pukul 07.06 WIB dari candle 48 jam terakhir, jadi harga di sini bisa sudah bergeser; cek Binance sebelum memasang order. Level batal tidak pernah kurang dari 1% di bawah harga masuk.</p>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
+<script>
+(function(){
+  "use strict";
+  var SUPABASE = "https://tigxfkysvjwhegnmrsna.supabase.co";
+  var ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpZ3hma3lzdmp3aGVnbm1yc25hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5MjY5MTksImV4cCI6MjEwNTUwMjkxOX0.p1awcLWzO1NmW6ZOQBVtdsZdn4UYzSEyogKSV-lMjU0";
+  var page = null, sel = null, opt = 0;
+  var chart = null, series = null, lines = [], chartSym = null, token = 0;
+
+  function $(id){ return document.getElementById(id); }
+  function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+  function num(v){ if (v === null || v === undefined || v === "") return null; var n = Number(v); return isFinite(n) ? n : null; }
+  function dec(p){ if (!p || p <= 0) return 4; return Math.max(2, Math.min(8, 4 - Math.floor(Math.log10(p)))); }
+  function fP(p, ref){ p = num(p); if (p === null) return "\u2013"; var d = dec(ref || p); return p.toLocaleString("id-ID", {minimumFractionDigits:d, maximumFractionDigits:d}); }
+  function fN(v, d){ v = num(v); if (v === null) return "\u2013"; return v.toLocaleString("id-ID", {minimumFractionDigits:d, maximumFractionDigits:d}); }
+  function fPct(v){ v = num(v); if (v === null) return "\u2013"; return (v > 0 ? "+" : "") + v.toLocaleString("id-ID", {minimumFractionDigits:2, maximumFractionDigits:2}) + "%"; }
+  function fDT(t){ return new Date(t).toLocaleString("id-ID", {timeZone:"Asia/Jakarta", weekday:"long", day:"numeric", month:"long", hour:"2-digit", minute:"2-digit"}); }
+  function base(s){ return String(s).replace(/USDT$/, ""); }
+  function css(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+  function where(lok){
+    lok = num(lok);
+    if (lok === null) return {t:"peta belum lengkap", mid:false};
+    if (lok <= 0.2) return {t:"di lantai", mid:false};
+    if (lok >= 0.8) return {t:"dekat atap", mid:false};
+    return {t:"di tengah", mid:true};
+  }
+  function alertMsg(m){ var a = $("alert"); if (m) { a.textContent = m; a.hidden = false; } else { a.hidden = true; } }
+
+  function rpc(name, args){
+    return fetch(SUPABASE + "/rest/v1/rpc/" + name, {
+      method: "POST",
+      headers: {"apikey": ANON_KEY, "Authorization": "Bearer " + ANON_KEY, "Content-Type": "application/json"},
+      body: JSON.stringify(args || {}), cache: "no-store"
+    }).then(function(r){
+      if (!r.ok) throw {status: r.status};
+      return r.json();
+    }, function(){ throw {status: 0}; });
+  }
+  function errText(e){
+    if (!e || e.status === 0) return "Supabase tidak bisa dihubungi. Periksa koneksi internet, lalu muat ulang halaman.";
+    if (e.status === 401 || e.status === 403) return "Supabase menolak kunci halaman ini (" + e.status + "). Kirim tangkapan layar ini ke chat.";
+    if (e.status === 404) return "Fungsi data tidak ditemukan (404). Kirim tangkapan layar ini ke chat.";
+    return "Data belum bisa dimuat (" + e.status + "). Muat ulang sebentar lagi.";
+  }
+
+  function load(){
+    rpc("in_page").then(function(d){
+      page = d; alertMsg("");
+      var k = page && page.koin ? page.koin : [];
+      if (!sel && k.length) sel = k[0].symbol;
+      render();
+    }).catch(function(e){ alertMsg(errText(e)); $("hero").innerHTML = "<h2>Menu belum tersedia</h2><p>Lihat pesan di atas.</p>"; });
+  }
+
+  function cur(){
+    if (!page || !page.koin) return null;
+    for (var i = 0; i < page.koin.length; i++) if (page.koin[i].symbol === sel) return page.koin[i];
+    return null;
+  }
+
+  function render(){
+    var k = page.koin || [];
+    var f = $("fresh");
+    if (page.dihitung) {
+      var age = Date.now() - new Date(page.dihitung).getTime();
+      f.textContent = (age > 26 * 3600000 ? "Belum diperbarui sejak " : "Dihitung ") + fDT(page.dihitung) + " WIB";
+      f.className = age > 26 * 3600000 ? "fresh warn" : "fresh";
+    }
+    $("hero").innerHTML = k.length
+      ? "<h2>Pagi ini, " + k.length + " koin terbaca dan hidup.</h2><p>Pilih koin, lalu pilih lantainya. Setiap pilihan menunjukkan harga masuk, level batal, dan dua atap beserta rasionya.</p>"
+      : "<h2>Pagi ini tidak ada koin yang lolos.</h2><p>Tidak ada yang cukup terbaca dan hidup. Hari tanpa trade juga bagian dari rencana.</p>";
+    renderList(k);
+    renderCoin();
+  }
+
+  function renderList(k){
+    $("list").innerHTML = k.map(function(x){
+      var d = x.data, w = where(d.lokasi);
+      return "<li><button class=\"row\" type=\"button\" data-s=\"" + esc(x.symbol) + "\" aria-pressed=\"" + (x.symbol === sel) + "\">" +
+        "<span class=\"n\">" + esc(base(x.symbol)) + "<span class=\"where" + (w.mid ? " mid" : "") + "\">" + esc(w.t) + "</span></span>" +
+        "<span><span class=\"sc\">" + esc(fN(d.skor, 0)) + "</span><span class=\"bar\"><span style=\"width:" + Math.max(0, Math.min(100, num(d.skor) || 0)) + "%\"></span></span></span>" +
+        "<span class=\"hd\">" + esc(d.hidup_dari_12) + "/12<small>hidup</small></span></button></li>";
+    }).join("");
+    Array.prototype.forEach.call($("list").querySelectorAll(".row"), function(b){
+      b.addEventListener("click", function(){
+        sel = b.getAttribute("data-s"); opt = 0; renderList(page.koin); renderCoin();
+        var rm = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        $("coin").scrollIntoView({behavior: rm ? "auto" : "smooth", block: "start"});
+      });
+    });
+  }
+
+  function renderCoin(){
+    var x = cur();
+    if (!x) { $("c-sym").innerHTML = "&nbsp;"; $("c-skor").textContent = ""; $("c-ctx").textContent = ""; $("menu").innerHTML = ""; msg("Tidak ada koin untuk ditampilkan."); return; }
+    var d = x.data, w = where(d.lokasi);
+    $("c-sym").innerHTML = esc(base(x.symbol)) + "<small>USDT</small>";
+    $("c-skor").innerHTML = "skor<b>" + esc(fN(d.skor, 0)) + "</b>";
+    $("c-ctx").innerHTML =
+      "<span>Harga <b>" + esc(fP(d.harga)) + "</b></span>" +
+      "<span>24 jam <b>" + esc(fPct(d.chg24)) + "</b></span>" +
+      "<span>Hidup <b>" + esc(d.hidup_dari_12) + " dari 12</b></span>" +
+      "<span>Lantai dihormati <b>" + esc(d.lantai_dihormati) + "</b></span>" +
+      "<span>Candle bersih <b>" + esc(d.candle_bersih) + "</b></span>" +
+      "<span class=\"" + (w.mid ? "mid" : "") + "\">Posisi harga <b class=\"" + (w.mid ? "mid" : "") + "\">" + esc(w.t) + "</b></span>";
+    renderMenu(d);
+    loadChart(x.symbol);
+  }
+
+  function renderMenu(d){
+    var L = d.lantai || [];
+    if (!L.length) { $("menu").innerHTML = "<p class=\"empty\">Belum ada lantai yang jelas di bawah harga dalam 48 jam terakhir.</p>"; return; }
+    if (opt >= L.length) opt = 0;
+    var ref = num(d.harga);
+    $("menu").innerHTML = "<h4 class=\"menu-title\">Pilihan lantai</h4><div class=\"opts\">" + L.map(function(o, i){
+      var risk = (1 - num(o.batal) / num(o.masuk)) * 100;
+      function rr(r){ r = num(r); return r === null ? "\u2013" : "<span class=\"" + (r >= 2 ? "good" : "") + "\">" + esc(fN(r, 1)) + "</span>"; }
+      return "<button class=\"opt\" type=\"button\" data-i=\"" + i + "\" aria-pressed=\"" + (i === opt) + "\">" +
+        "<div class=\"opt-head\"><span class=\"opt-name\">Lantai " + (i + 1) + "</span><span class=\"opt-price\">" + esc(fP(o.lantai, ref)) + "</span></div>" +
+        "<div class=\"opt-sub\">" + esc(fN(o.jarak_pct, 2)) + "% di bawah harga, disentuh lalu bertahan " + esc(o.sentuh_bertahan) + " kali" + (o.pernah_jebol ? ", <span class=\"no\">pernah jebol</span>" : "") + "</div>" +
+        "<div class=\"opt-rows\">" +
+          "<span class=\"k\">Masuk</span><span class=\"v\">" + esc(fP(o.masuk, ref)) + "</span>" +
+          "<span class=\"k\">Batal</span><span class=\"v\">" + esc(fP(o.batal, ref)) + " (" + esc(fN(-risk, 2)) + "%)</span>" +
+          "<span class=\"k\">Atap dekat</span><span class=\"v\">" + (o.atap === null ? "\u2013" : esc(fP(o.atap, ref)) + ", rasio " + rr(o.rasio)) + "</span>" +
+          "<span class=\"k\">Atap besar</span><span class=\"v\">" + (o.atap_besar === null || o.atap_besar === undefined ? "\u2013" : esc(fP(o.atap_besar, ref)) + ", rasio " + rr(o.rasio_besar)) + "</span>" +
+        "</div></button>";
+    }).join("") + "</div>";
+    Array.prototype.forEach.call($("menu").querySelectorAll(".opt"), function(b){
+      b.addEventListener("click", function(){ opt = Number(b.getAttribute("data-i")); renderMenu(d); drawLines(); });
+    });
+  }
+
+  function msg(m){ var e = $("chart-msg"); if (m) { e.textContent = m; e.hidden = false; } else { e.hidden = true; } }
+  function theme(){
+    return {layout:{background:{type:"solid", color:css("--surface")}, textColor:css("--muted"), fontFamily:"\"IBM Plex Sans\", system-ui, sans-serif"},
+      grid:{vertLines:{color:css("--grid")}, horzLines:{color:css("--grid")}},
+      rightPriceScale:{borderColor:css("--line")}, timeScale:{borderColor:css("--line")}};
+  }
+  function candles(){ var c = css("--candle"); return {upColor:css("--surface"), downColor:c, borderUpColor:c, borderDownColor:c, wickUpColor:c, wickDownColor:c}; }
+  function ensure(){
+    if (chart) return true;
+    if (!window.LightweightCharts) { msg("Pustaka chart tidak termuat. Menu angka di bawah tetap berlaku."); return false; }
+    var LC = window.LightweightCharts;
+    chart = LC.createChart($("chart"), Object.assign({
+      autoSize: true,
+      localization: {locale:"id-ID", timeFormatter: function(t){ return new Date(t * 1000).toLocaleString("id-ID", {timeZone:"Asia/Jakarta", day:"numeric", month:"short", hour:"2-digit", minute:"2-digit"}) + " WIB"; }},
+      timeScale: {timeVisible:true, secondsVisible:false, rightOffset:4,
+        tickMarkFormatter: function(t, type){ var d = new Date(t * 1000); return type <= 2 ? d.toLocaleDateString("id-ID", {timeZone:"Asia/Jakarta", day:"numeric", month:"short"}) : d.toLocaleTimeString("id-ID", {timeZone:"Asia/Jakarta", hour:"2-digit", minute:"2-digit"}); }}
+    }, theme()));
+    series = chart.addCandlestickSeries(candles());
+    return true;
+  }
+  function drawLines(){
+    if (!series) return;
+    lines.forEach(function(l){ series.removePriceLine(l); }); lines = [];
+    var x = cur(); if (!x) return;
+    var o = (x.data.lantai || [])[opt]; if (!o) return;
+    var LS = window.LightweightCharts.LineStyle;
+    function add(p, color, style, w, title){ p = num(p); if (p === null) return; lines.push(series.createPriceLine({price:p, color:color, lineStyle:style, lineWidth:w, axisLabelVisible:true, title:title})); }
+    add(o.atap_besar, css("--target"), LS.Dashed, 2, "atap besar");
+    add(o.atap, css("--roof"), LS.Dotted, 1, "atap dekat");
+    add(o.lantai, css("--floor"), LS.Solid, 2, "lantai " + (opt + 1));
+    add(o.batal, css("--stop"), LS.Dashed, 2, "batal");
+  }
+  function loadChart(s){
+    if (!ensure()) return;
+    var my = ++token;
+    if (s !== chartSym) msg("Memuat chart");
+    rpc("in_chart", {p_symbol: s}).then(function(d){
+      if (my !== token) return;
+      d = Array.isArray(d) ? d : [];
+      if (!d.length) { msg("Belum ada candle untuk koin ini."); return; }
+      var x = cur(), p = dec(num(x && x.data.harga) || num(d[d.length - 1][4]));
+      series.applyOptions({priceFormat:{type:"price", precision:p, minMove:Math.pow(10, -p)}});
+      series.setData(d.map(function(b){ return {time:Number(b[0]), open:Number(b[1]), high:Number(b[2]), low:Number(b[3]), close:Number(b[4])}; }));
+      drawLines();
+      if (s !== chartSym) { chart.timeScale().fitContent(); chartSym = s; }
+      msg("");
+    }).catch(function(e){ if (my === token) msg(errText(e)); });
+  }
+  function onTheme(){ if (!chart) return; chart.applyOptions(theme()); series.applyOptions(candles()); drawLines(); }
+  if (window.matchMedia) { var mq = window.matchMedia("(prefers-color-scheme: dark)"); if (mq.addEventListener) mq.addEventListener("change", onTheme); }
+
+  load();
+  document.addEventListener("visibilitychange", function(){ if (!document.hidden) load(); });
+})();
+</script>
+</body>
+</html>
