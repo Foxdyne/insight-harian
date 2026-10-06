@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Uji pasangan MA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF2F1; --surface:#F8FAF9; --ink:#1E2B30; --muted:#5B6B70; --line:#C9D3D1;
+  --pass:#0E7A68; --fail:#B0283F; --luck:#A57808; --accent:#2F4C8A; --accent-ink:#FFFFFF;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#141B1E; --surface:#1B2528; --ink:#E4ECEA; --muted:#9AAAA8; --line:#2C3A3E;
+    --pass:#3CC2A6; --fail:#F06A82; --luck:#E3B341; --accent:#8FA8E6; --accent-ink:#141B1E;
+  }
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size:17px; line-height:1.55; -webkit-text-size-adjust:100%;
+}
+main{max-width:880px; margin:0 auto; padding:28px 18px 64px}
+h1{font-size:2.1rem; line-height:1.15; margin:0 0 8px; letter-spacing:-0.01em}
+.lead{color:var(--muted); margin:0 0 28px; max-width:62ch}
+h2{font-size:1.25rem; margin:36px 0 12px}
+.panel{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:18px}
+.grid{display:grid; gap:14px 16px; grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.field{display:flex; flex-direction:column; gap:6px}
+.field.wide{grid-column:1/-1}
+label{font-weight:700; font-size:.95rem}
+.hint{color:var(--muted); font-size:.85rem}
+input,select{
+  font:inherit; color:var(--ink); background:var(--bg); border:1px solid var(--line);
+  border-radius:8px; padding:9px 11px; width:100%; max-width:100%;
+}
+input:focus-visible,select:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+.actions{display:flex; align-items:center; gap:14px; margin-top:18px; flex-wrap:wrap}
+button{
+  font:inherit; font-weight:700; border:0; border-radius:10px; padding:11px 20px;
+  background:var(--accent); color:var(--accent-ink); cursor:pointer;
+}
+button[disabled]{opacity:.55; cursor:progress}
+#status{color:var(--muted)}
+.verdict{font-size:1.45rem; line-height:1.3; font-weight:700; margin:0 0 6px}
+.verdict.ok{color:var(--pass)} .verdict.no{color:var(--fail)}
+.sub{color:var(--muted); margin:0}
+.period{color:var(--muted); font-size:.9rem; margin-top:10px}
+.coin{border-top:1px solid var(--line); padding:16px 0}
+.coin:first-child{border-top:0; padding-top:4px}
+.coin-head{display:flex; justify-content:space-between; align-items:baseline; gap:12px; flex-wrap:wrap}
+.coin-name{font-size:1.2rem; font-weight:700}
+.badge{font-weight:700; font-size:.9rem; padding:2px 10px; border-radius:999px; border:1.5px solid currentColor}
+.badge.ok{color:var(--pass)} .badge.no{color:var(--fail)} .badge.err{color:var(--muted)}
+.kv{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:4px 18px; margin:10px 0}
+.kv div{display:flex; flex-direction:column}
+.kv span:first-child{color:var(--muted); font-size:.82rem}
+.kv span:last-child{font-variant-numeric:tabular-nums; font-weight:700}
+.pos{color:var(--pass)} .neg{color:var(--fail)}
+.meter{margin:12px 0 8px}
+.meter-label{font-size:.85rem; color:var(--muted); margin-bottom:5px}
+.track{position:relative; height:12px; background:var(--bg); border:1px solid var(--line); border-radius:999px; overflow:visible}
+.fill{position:absolute; left:0; top:0; bottom:0; border-radius:999px}
+.limit{position:absolute; top:-5px; bottom:-5px; width:3px; background:var(--luck); border-radius:2px}
+.checks{display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:8px; font-size:.9rem}
+.checks span{white-space:nowrap}
+.checks .y{color:var(--pass)} .checks .n{color:var(--fail)}
+details{margin-top:36px; border-top:1px solid var(--line); padding-top:14px}
+summary{cursor:pointer; font-weight:700; font-size:1.1rem}
+details p, details li{max-width:66ch}
+.formula{background:var(--surface); border-left:4px solid var(--luck); padding:10px 14px; border-radius:6px; margin:12px 0}
+.err-box{color:var(--fail)}
+@media (max-width:520px){ h1{font-size:1.75rem} body{font-size:16px} }
+@media (prefers-reduced-motion: reduce){ *{transition:none!important} }
+</style>
+</head>
+<body>
+<main>
+  <h1>Uji pasangan MA</h1>
+  <p class="lead">Apakah formula ini lebih baik dari kebetulan? Juara dipilih dari bagian awal data, lalu dibuktikan di bagian akhir yang tidak ikut dipakai memilih.</p>
+
+  <section class="panel" aria-label="Pengaturan uji">
+    <div class="grid">
+      <div class="field wide">
+        <label for="koin">Koin</label>
+        <input id="koin" value="BTC, ETH, SOL, HYPE, ENA, ASTER, TAO, RENDER, SUI">
+        <span class="hint">Pisahkan dengan koma. USDT ditambahkan otomatis.</span>
+      </div>
+      <div class="field">
+        <label for="tf">Timeframe</label>
+        <select id="tf">
+          <option value="15m" selected>15 menit</option>
+          <option value="1h">1 jam</option>
+          <option value="4h">4 jam</option>
+          <option value="1d">Harian</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="n">Jumlah candle</label>
+        <input id="n" type="number" min="300" max="5000" step="100" value="1000">
+        <span class="hint">1000 candle 15 menit ≈ 10 hari.</span>
+      </div>
+      <div class="field">
+        <label for="versi">Arah</label>
+        <select id="versi">
+          <option value="both" selected>Long saja dan long-short</option>
+          <option value="L">Long saja</option>
+          <option value="LS">Long-short</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="cepat">MA cepat</label>
+        <input id="cepat" value="5, 10, 20, 30, 50">
+      </div>
+      <div class="field">
+        <label for="lambat">MA lambat</label>
+        <input id="lambat" value="20, 50, 100, 150, 200">
+      </div>
+      <div class="field">
+        <label for="uji">Bagian uji</label>
+        <input id="uji" type="number" min="10" max="60" step="5" value="30">
+        <span class="hint">Persen data terakhir yang disimpan untuk pembuktian.</span>
+      </div>
+      <div class="field">
+        <label for="fee">Fee per transaksi (%)</label>
+        <input id="fee" type="number" min="0" step="0.01" value="0.05">
+      </div>
+      <div class="field">
+        <label for="fund">Funding per 8 jam (%)</label>
+        <input id="fund" type="number" step="0.001" value="0.01">
+        <span class="hint">Long membayar, short menerima.</span>
+      </div>
+    </div>
+    <div class="actions">
+      <button id="run" type="button">Jalankan uji</button>
+      <span id="status" role="status" aria-live="polite"></span>
+    </div>
+  </section>
+
+  <section id="hasil" aria-live="polite"></section>
+
+  <details>
+    <summary>Cara membaca hasil</summary>
+    <p>Setiap pasangan MA dicoba di setiap koin. Posisi diputuskan dari penutupan candle sebelumnya, jadi tidak ada informasi dari masa depan. Modal 1x, seluruh saldo sebagai margin. Kalau harga bergerak melawan posisi lebih dari 100% dalam satu candle, saldo dianggap habis.</p>
+    <p>Juara setiap koin dipilih dari bagian awal data. Ia dinyatakan lolos hanya kalau memenuhi kelima syarat ini:</p>
+    <ul>
+      <li><b>Bukan kebetulan:</b> keunggulannya saat dipilih melewati batas kebetulan.</li>
+      <li><b>Untung:</b> masih untung di bagian uji, setelah fee dan funding.</li>
+      <li><b>Lebih baik dari pegang:</b> mengalahkan sekadar membeli dan memegang di bagian uji.</li>
+      <li><b>Paruh atas:</b> di bagian uji, ia tetap di paruh atas peringkat semua formula.</li>
+      <li><b>Cukup transaksi:</b> minimal 10 kali ganti posisi di bagian uji.</li>
+    </ul>
+    <p>Kalau kamu menguji banyak formula, salah satunya pasti terlihat hebat murni karena keberuntungan. Batas kebetulan memperkirakan seberapa hebat:</p>
+    <div class="formula">Batas kebetulan = √(2 × ln jumlah formula)<br><span class="hint">diukur dalam satuan sebaran hasil semua formula</span></div>
+    <p>Pada meteran, garis kuning adalah batas itu. Batang juara harus melewatinya.</p>
+    <p><b>Formula bersama</b> adalah satu pasangan yang hasil tengahnya terbaik di semua koin saat dipilih. Ia lolos kalau di bagian uji untung dan mengalahkan pegang di minimal dua pertiga koin. Satu formula yang bekerja di banyak koin jauh lebih bisa dipercaya daripada juara yang berbeda di setiap koin.</p>
+  </details>
+</main>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  const TF_H = {"15m":0.25,"1h":1,"4h":4,"1d":24};
+  const nf = new Intl.NumberFormat("id-ID",{minimumFractionDigits:1,maximumFractionDigits:1});
+  const pct = x => (x>=0?"+":"") + nf.format(x*100) + "%";
+  const cls = x => x>=0 ? "pos" : "neg";
+  const parseNums = s => [...new Set(s.split(/[\s,;]+/).map(Number).filter(v=>Number.isInteger(v)&&v>=2))].sort((a,b)=>a-b);
+  const parseCoins = s => s.split(/[\s,;]+/).map(x=>x.trim().toUpperCase()).filter(x=>x && !/^(USDT|USDC|FDUSD)$/.test(x))
+    .map(x=>/(USDT|USDC|FDUSD)$/.test(x)?x:x+"USDT");
+  const fmtDate = t => new Date(t).toLocaleString("id-ID",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
+  const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+  async function fetchKlines(sym, tf, n){
+    const sources = [
+      {name:"futures", base:"https://fapi.binance.com/fapi/v1/klines", max:1500},
+      {name:"spot", base:"https://data-api.binance.vision/api/v3/klines", max:1000}
+    ];
+    let lastErr = "";
+    for (const src of sources){
+      try{
+        let out = [], end = null;
+        while (out.length < n){
+          const lim = Math.min(src.max, n - out.length + 1);
+          const url = `${src.base}?symbol=${sym}&interval=${tf}&limit=${lim}` + (end!==null ? `&endTime=${end}` : "");
+          const r = await fetch(url);
+          if (!r.ok) throw new Error("HTTP " + r.status);
+          const k = await r.json();
+          if (!Array.isArray(k) || !k.length) break;
+          out = k.concat(out);
+          end = k[0][0] - 1;
+          if (k.length < lim) break;
+        }
+        const now = Date.now();
+        out = out.filter(x => x[6] < now);
+        if (out.length > n) out = out.slice(out.length - n);
+        if (out.length) return {src:src.name, t:out.map(x=>x[0]), c:out.map(x=>+x[4])};
+        lastErr = "data kosong";
+      }catch(e){ lastErr = e.message; }
+    }
+    throw new Error(lastErr || "gagal");
+  }
+
+  function sma(c, L){
+    const out = new Float64Array(c.length).fill(NaN);
+    let s = 0;
+    for (let i=0;i<c.length;i++){
+      s += c[i];
+      if (i>=L) s -= c[i-L];
+      if (i>=L-1) out[i] = s/L;
+    }
+    return out;
+  }
+
+  function simulate(c, mf, ms, ls, s0, split, fee, fundBar){
+    let prev = 0, eqP = 1, eqU = 1, trU = 0, deadP = false, deadU = false;
+    for (let i=s0+1;i<c.length;i++){
+      const pos = mf[i-1] > ms[i-1] ? 1 : (ls ? -1 : 0);
+      const ch = Math.abs(pos - prev);
+      let r = pos*(c[i]/c[i-1]-1) - fee*ch - fundBar*pos;
+      if (r <= -1) r = -1;
+      if (i <= split){ eqP *= (1+r); if (eqP<=0) {eqP=0; deadP=true;} }
+      else { eqU *= (1+r); if (ch>0) trU++; if (eqU<=0) {eqU=0; deadU=true;} }
+      prev = pos;
+    }
+    return {pilih:eqP-1, uji:eqU-1, trades:trU, habis:deadP||deadU};
+  }
+
+  function median(a){ const s=[...a].sort((x,y)=>x-y), m=s.length>>1; return s.length%2?s[m]:(s[m-1]+s[m])/2; }
+
+  function analyse(d, pairs, vers, ujiFrac, fee, fundBar){
+    const maxSlow = Math.max(...pairs.map(p=>p[1]));
+    const N = d.c.length, s0 = maxSlow - 1, T = N - 1 - s0;
+    if (T < 120) throw new Error("data terlalu pendek untuk MA " + maxSlow);
+    const split = s0 + Math.floor(T*(1-ujiFrac));
+    const cache = {};
+    const get = L => cache[L] || (cache[L] = sma(d.c, L));
+    const res = [];
+    for (const [f,s] of pairs) for (const v of vers){
+      const r = simulate(d.c, get(f), get(s), v==="LS", s0, split, fee, fundBar);
+      res.push({id:(v==="L"?"Long ":"Long-short ")+f+"/"+s, ...r});
+    }
+    const holdP = d.c[split]/d.c[s0]-1, holdU = d.c[N-1]/d.c[split]-1;
+    const K = res.length;
+    const pil = res.map(r=>r.pilih), mean = pil.reduce((a,b)=>a+b,0)/K;
+    const sd = Math.sqrt(pil.reduce((a,b)=>a+(b-mean)**2,0)/Math.max(1,K-1));
+    const champ = res.reduce((a,b)=> b.pilih>a.pilih ? b : a);
+    const ujiSorted = [...res].sort((a,b)=>b.uji-a.uji);
+    const rankOf = id => ujiSorted.findIndex(r=>r.id===id)+1;
+    const z = sd>0 ? (champ.pilih-mean)/sd : 0;
+    const limit = K>1 ? Math.sqrt(2*Math.log(K)) : 0;
+    const rank = rankOf(champ.id);
+    const checks = [
+      ["Bukan kebetulan", z > limit],
+      ["Untung", champ.uji > 0 && !champ.habis],
+      ["Lebih baik dari pegang", champ.uji > holdU],
+      ["Paruh atas", rank <= K/2],
+      ["Cukup transaksi", champ.trades >= 10]
+    ];
+    return {res, K, champ, z, limit, rank, holdP, holdU, checks, pass:checks.every(c=>c[1]),
+      tStart:d.t[s0], tSplit:d.t[split], tEnd:d.t[N-1], rankOf, avgUji:res.reduce((a,b)=>a+b.uji,0)/K};
+  }
+
+  function meter(z, limit){
+    const max = Math.max(4, limit+0.8, z+0.5);
+    const w = Math.max(0, Math.min(100, z/max*100));
+    const lp = limit/max*100;
+    const col = z>limit ? "var(--pass)" : "var(--fail)";
+    return `<div class="meter"><div class="meter-label">Ukuran keunggulan saat dipilih: ${nf.format(z)} · batas kebetulan ${nf.format(limit)}</div>
+      <div class="track" role="img" aria-label="Keunggulan ${nf.format(z)} dibanding batas kebetulan ${nf.format(limit)}">
+      <div class="fill" style="width:${w}%;background:${col}"></div><div class="limit" style="left:calc(${lp}% - 1px)"></div></div></div>`;
+  }
+
+  async function run(){
+    const btn = $("run"), st = $("status"), out = $("hasil");
+    const coins = parseCoins($("koin").value), tf = $("tf").value;
+    const n = Math.max(300, Math.min(5000, parseInt($("n").value)||1000));
+    const fast = parseNums($("cepat").value), slow = parseNums($("lambat").value);
+    const vers = $("versi").value==="both" ? ["L","LS"] : [$("versi").value];
+    const ujiFrac = Math.max(0.1, Math.min(0.6, (parseFloat($("uji").value)||30)/100));
+    const fee = (parseFloat($("fee").value)||0)/100;
+    const fundBar = (parseFloat($("fund").value)||0)/100 * TF_H[tf]/8;
+    const pairs = []; for (const f of fast) for (const s of slow) if (f<s) pairs.push([f,s]);
+    out.innerHTML = "";
+    if (!coins.length){ st.textContent = "Isi minimal satu koin."; return; }
+    if (!pairs.length){ st.textContent = "Tidak ada pasangan: MA cepat harus lebih kecil dari MA lambat."; return; }
+    if (n - Math.max(...slow) < 150){ st.textContent = "Tambah jumlah candle: minimal MA lambat terbesar ditambah 150."; return; }
+    btn.disabled = true;
+    const rows = [];
+    for (let i=0;i<coins.length;i++){
+      st.textContent = `Mengambil ${coins[i]} (${i+1}/${coins.length})…`;
+      try{
+        const d = await fetchKlines(coins[i], tf, n);
+        if (d.c.length < Math.max(...slow)+150) throw new Error("riwayat terlalu pendek ("+d.c.length+" candle)");
+        rows.push({sym:coins[i], src:d.src, a:analyse(d, pairs, vers, ujiFrac, fee, fundBar)});
+      }catch(e){ rows.push({sym:coins[i], err:e.message}); }
+    }
+    btn.disabled = false;
+    st.textContent = "Selesai.";
+    render(rows, pairs.length*vers.length);
+  }
+
+  function render(rows, K){
+    const ok = rows.filter(r=>r.a);
+    const out = $("hasil");
+    if (!ok.length){ out.innerHTML = `<h2>Hasil</h2><p class="err-box">Tidak ada data yang berhasil diambil. Periksa nama koin atau koneksi ke Binance.</p>`; return; }
+    const ids = ok[0].a.res.map(r=>r.id);
+    let best = null;
+    for (const id of ids){
+      const m = median(ok.map(r=>r.a.res.find(x=>x.id===id).pilih));
+      if (!best || m>best.m) best = {id, m};
+    }
+    const common = ok.map(r=>{ const x=r.a.res.find(y=>y.id===best.id); return {sym:r.sym, uji:x.uji, hold:r.a.holdU, rank:r.a.rankOf(best.id), win:x.uji>0 && x.uji>r.a.holdU && !x.habis}; });
+    const need = Math.ceil(ok.length*2/3);
+    const commonWins = common.filter(c=>c.win).length;
+    const commonPass = commonWins >= need;
+    const champPass = ok.filter(r=>r.a.pass).length;
+
+    let verdict, sub;
+    if (commonPass){
+      verdict = `Formula ${best.id} lolos di ${commonWins} dari ${ok.length} koin.`;
+      sub = `Satu formula yang bertahan di banyak koin di bagian uji. Tetap uji ulang di data lain sebelum dipakai.`;
+    } else {
+      verdict = `Tidak ada formula yang terbukti lebih baik dari kebetulan.`;
+      sub = champPass >= need
+        ? `Juara per koin lolos di ${champPass} dari ${ok.length} koin, tapi juaranya berbeda-beda, jadi tidak ada satu formula yang bisa dipakai bersama.`
+        : `Formula bersama hanya menang di ${commonWins} dari ${ok.length} koin, dan juara per koin lolos di ${champPass} dari ${ok.length} koin.`;
+    }
+    const a0 = ok[0].a;
+    let html = `<h2>Hasil</h2><div class="panel">
+      <p class="verdict ${commonPass?"ok":"no"}">${esc(verdict)}</p><p class="sub">${esc(sub)}</p>
+      <p class="period">${K} formula per koin. Dipilih dari ${fmtDate(a0.tStart)} sampai ${fmtDate(a0.tSplit)}, diuji sampai ${fmtDate(a0.tEnd)}.</p></div>`;
+
+    html += `<h2>Formula bersama: ${esc(best.id)}</h2><div class="panel">
+      <p class="sub">Hasil tengahnya terbaik di semua koin saat dipilih. Butuh menang di minimal ${need} dari ${ok.length} koin.</p>
+      <div class="kv" style="margin-top:12px">` +
+      common.map(c=>`<div><span>${esc(c.sym.replace(/USDT$/,""))} · peringkat ${c.rank}/${K}</span><span class="${c.win?"pos":"neg"}">${pct(c.uji)} <span style="font-weight:400;color:var(--muted)">vs pegang ${pct(c.hold)}</span></span></div>`).join("") +
+      `</div></div>`;
+
+    html += `<h2>Juara per koin</h2><div class="panel">`;
+    for (const r of rows){
+      if (!r.a){
+        html += `<div class="coin"><div class="coin-head"><span class="coin-name">${esc(r.sym.replace(/USDT$/,""))}</span><span class="badge err">Tidak terbaca</span></div><p class="sub">${esc(r.err)}</p></div>`;
+        continue;
+      }
+      const a = r.a, c = a.champ;
+      html += `<div class="coin">
+        <div class="coin-head"><span class="coin-name">${esc(r.sym.replace(/USDT$/,""))} <span class="hint">${r.src}</span></span>
+        <span class="badge ${a.pass?"ok":"no"}">${a.pass?"Lolos":"Gagal"}</span></div>
+        <div class="kv">
+          <div><span>Juara saat dipilih</span><span>${esc(c.id)}</span></div>
+          <div><span>Hasil saat dipilih</span><span class="${cls(c.pilih)}">${pct(c.pilih)}</span></div>
+          <div><span>Hasil di bagian uji</span><span class="${cls(c.uji)}">${pct(c.uji)}${c.habis?" · saldo habis":""}</span></div>
+          <div><span>Pegang di bagian uji</span><span class="${cls(a.holdU)}">${pct(a.holdU)}</span></div>
+          <div><span>Peringkat di uji</span><span>${a.rank} dari ${a.K}</span></div>
+          <div><span>Rata-rata semua formula di uji</span><span class="${cls(a.avgUji)}">${pct(a.avgUji)}</span></div>
+          <div><span>Ganti posisi di uji</span><span>${c.trades}</span></div>
+        </div>
+        ${meter(a.z, a.limit)}
+        <div class="checks">${a.checks.map(([k,v])=>`<span class="${v?"y":"n"}">${v?"✓":"✗"} ${k}</span>`).join("")}</div>
+      </div>`;
+    }
+    html += `</div>`;
+    out.innerHTML = html;
+    out.scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block:"start"});
+  }
+
+  $("run").addEventListener("click", run);
+})();
+</script>
+</body>
+</html>
